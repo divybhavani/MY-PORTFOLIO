@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Send, Mail, CheckCircle2 } from 'lucide-react';
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Send, Mail, CheckCircle2 } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,12 +22,12 @@ export default function Contact() {
           rotationX: 0,
           z: 0,
           duration: 1,
-          ease: 'power3.out',
+          ease: "power3.out",
           scrollTrigger: {
             trigger: sectionRef.current,
-            start: 'top 75%',
+            start: "top 75%",
           },
-        }
+        },
       );
     }, sectionRef);
 
@@ -37,47 +37,62 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     const formData = new FormData(formRef.current!);
     const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      message: formData.get('message'),
+      name: formData.get("name"),
+      email: formData.get("email"),
+      message: formData.get("message"),
     };
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
+      const response = await fetch("/api/contact", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      let result;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(
+          `Server returned non-JSON response. Status: ${response.status}. Content: ${text.substring(0, 50)}...`,
+        );
+      }
 
       if (response.ok) {
         if (formRef.current) formRef.current.reset();
         setIsSuccess(true);
       } else {
-        alert(result.error || 'Failed to send message. Please try again.');
+        alert(result?.error || "Failed to send message. Please try again.");
       }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('An error occurred. Please try again later.');
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      alert(`An error occurred: ${error.message || "Please try again later."}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section id="contact" ref={sectionRef} className="relative z-10 py-32 px-4 max-w-7xl mx-auto" style={{ perspective: '1000px' }}>
+    <section
+      id="contact"
+      ref={sectionRef}
+      className="relative z-10 py-32 px-4 max-w-7xl mx-auto"
+      style={{ perspective: "1000px" }}
+    >
       <div className="text-center mb-16">
         <h2 className="text-4xl md:text-5xl font-bold mb-6 font-display">
           Let's <span className="text-gradient">Connect</span>
         </h2>
         <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-          Interested in working together or have a project idea? Feel free to reach out.
+          Interested in working together or have a project idea? Feel free to
+          reach out.
         </p>
       </div>
 
@@ -86,13 +101,18 @@ export default function Contact() {
           <div className="glass p-8 rounded-3xl">
             <h3 className="text-2xl font-bold text-white mb-6">Contact Info</h3>
             <div className="space-y-6">
-              <a href="mailto:techbydivy@gmail.com" className="flex items-center gap-4 text-gray-400 hover:text-[#22D3EE] transition-colors group">
+              <a
+                href="mailto:techbydivy@gmail.com"
+                className="flex items-center gap-4 text-gray-400 hover:text-[#22D3EE] transition-colors group"
+              >
                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#22D3EE]/20 transition-colors">
                   <Mail size={20} />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-500">Email</p>
-                  <p className="text-lg text-white group-hover:text-[#22D3EE] transition-colors">techbydivy@gmail.com</p>
+                  <p className="text-lg text-white group-hover:text-[#22D3EE] transition-colors">
+                    techbydivy@gmail.com
+                  </p>
                 </div>
               </a>
             </div>
@@ -117,16 +137,21 @@ export default function Contact() {
               </button>
             </div>
           ) : (
-            <form 
-              ref={formRef} 
+            <form
+              ref={formRef}
               onSubmit={handleSubmit}
               className="glass p-8 md:p-12 rounded-3xl space-y-6 relative overflow-hidden transform-gpu"
             >
               <div className="absolute inset-0 bg-gradient-accent opacity-5 pointer-events-none" />
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
                 <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-medium text-gray-400">Name</label>
+                  <label
+                    htmlFor="name"
+                    className="text-sm font-medium text-gray-400"
+                  >
+                    Name
+                  </label>
                   <input
                     type="text"
                     id="name"
@@ -136,9 +161,14 @@ export default function Contact() {
                     placeholder="John Doe"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-gray-400">Email</label>
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-400"
+                  >
+                    Email
+                  </label>
                   <input
                     type="email"
                     id="email"
@@ -149,9 +179,14 @@ export default function Contact() {
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2 relative z-10">
-                <label htmlFor="message" className="text-sm font-medium text-gray-400">Message</label>
+                <label
+                  htmlFor="message"
+                  className="text-sm font-medium text-gray-400"
+                >
+                  Message
+                </label>
                 <textarea
                   id="message"
                   name="message"
@@ -161,7 +196,7 @@ export default function Contact() {
                   placeholder="Tell me about your project..."
                 />
               </div>
-              
+
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -169,8 +204,13 @@ export default function Contact() {
               >
                 <div className="absolute inset-0 bg-gradient-accent opacity-0 group-hover:opacity-20 transition-opacity" />
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
-                  {!isSubmitting && <Send size={18} className="group-hover:translate-x-1 transition-transform" />}
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                  {!isSubmitting && (
+                    <Send
+                      size={18}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  )}
                 </span>
               </button>
             </form>
